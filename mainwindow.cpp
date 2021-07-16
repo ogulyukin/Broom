@@ -75,6 +75,7 @@ void MainWindow::on_pushButton_clicked()
          count++;
      }
      ui->tabWidget->setCurrentWidget(ui->tab);
+     QMessageBox::information(this, "Информация", "Задания по удалению завершены!");
 }
 void MainWindow::createConfig()
 {
