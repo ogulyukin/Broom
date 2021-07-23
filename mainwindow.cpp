@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     configMap = ConfigLoader::readConfig("config.json");
     //qDebug() << "Всего считано полей: " << configMap->size();
     ui->setupUi(this);
+    QMainWindow::setWindowTitle("Broom. Уборка мусора на вашем компе");
     log = new Logger(ui->textBrowser, ui->statusbar);
     log->addEvent("ИНФО", "Запуск программы", "Считано " + QString::number(configMap->size()) + " записей кофигурационного файла");
     QMap<QString, QString>::iterator it;
