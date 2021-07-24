@@ -6,4 +6,5 @@ DirInfo::DirInfo()
     this->filesC = 0;
     this->items = 0;
     this->size = 0;
+    this->allItem = 0;
 }

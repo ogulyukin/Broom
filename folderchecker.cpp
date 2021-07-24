@@ -14,7 +14,8 @@ void FolderChecker::isExistDir(QCheckBox* cb, QString path, DirInfo &DI)
     DI.size = 0;
     DI.filesC = 0;
     DI.dirC = 0;
-    DI.filesC += fileCountsCollector(path, DI.dirC, DI.size);
+    DI.allItem = dir->count();
+    DI.filesC += fileCountsCollector(path, DI.dirC, DI.size, DI.allItem);
     //qDebug() << " Найдено: " << DI.filesC << " файлов, " << DI.dirC << " папок." << "Объем: " << DI.size;
     delete dir;
     return;
@@ -27,25 +28,25 @@ void FolderChecker::deleteFiles(QString path, Logger *log)
     log->addEvent("ИНФО", "Удаление", "Удаление файлов завершено");
 }
 
-int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC)
+int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC, int &otherC)
 {
     QDir *dir = new QDir(path);
-    QList<QFileInfo> fileList = dir->entryInfoList();
+    QList<QFileInfo> fileList = dir->entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden);
     QList<QFileInfo>::iterator it = fileList.begin();
-    getIteratorPos(it);
+    //getIteratorPos(it);
     int result = 0;
     for(; it != fileList.end(); it++)
     {
         if(it->isDir())
         {
-            result += fileCountsCollector(it->absoluteFilePath(), dirC, sizeC);
+            result += fileCountsCollector(it->absoluteFilePath(), dirC, sizeC, otherC);
             dirC++;
-        }
-        if(it->isFile())
+        }else if(it->isFile())
         {
             result++;
             sizeC += it->size();
         }
+            otherC += dir->count();
     }
     delete dir;
     return result;
@@ -61,18 +62,18 @@ void FolderChecker::qListSum(QList<QFileInfo> *list, QList<QFileInfo> *other)
     delete other;
 }
 
-void FolderChecker::getIteratorPos(QList<QFileInfo>::iterator &it)
-{
-  it++;
-  it++;
-}
+//void FolderChecker::getIteratorPos(QList<QFileInfo>::iterator &it)
+//{
+//  it++;
+//  it++;
+//}
 
 void FolderChecker::collectTargets(QString path, QString ignore, Logger *log)
 {
     QDir *dir = new QDir(path);
-    QFileInfoList list = dir->entryInfoList(QDir::AllEntries);
+    QFileInfoList list = dir->entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden);
     QFileInfoList::iterator it = list.begin();
-    getIteratorPos(it);
+    //getIteratorPos(it);
     for (; it != list.end(); it++)
     {
         qDebug() << it->absoluteFilePath();
@@ -118,7 +119,7 @@ void FolderChecker::printResult(QFileInfo &it, Logger *log)
     }
 }
 
-FolderChecker::FolderChecker()
-{
+//FolderChecker::FolderChecker()
+//{
 
-}
+//}
