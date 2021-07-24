@@ -8,6 +8,7 @@ public:
     int size;
     int items;
     int filesC;
+    int allItem;
     int dirC;
     DirInfo();
 };
