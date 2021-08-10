@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     QMainWindow::setWindowTitle("Broom. Уборка мусора на вашем компе");
     log = new Logger(ui->textBrowser, ui->statusbar);
-    log->addEvent("ИНФО", "Запуск программы", "Считано " + QString::number(configMap->size()) + " записей кофигурационного файла");
+    log->addEvent("<font color = \"yellow\"><b>ИНФО</b></font>", "Запуск программы", "Считано " + QString::number(configMap->size()) + " записей кофигурационного файла");
     QMap<QString, QString>::iterator it;
     QGridLayout *cbLayout = new QGridLayout(this);
     cbLayout->addWidget(ui->cbAll);
@@ -77,19 +77,6 @@ void MainWindow::on_pushButton_clicked()
      }
      ui->tabWidget->setCurrentWidget(ui->tab);
      QMessageBox::information(this, "Информация", "Задания по удалению завершены!");
-}
-void MainWindow::createConfig()
-{
-    QMap<QString, QString> map;
-    map.insert("Временные файлы пользователя", "%TEMP%");
-    map.insert("Временные файлы Windows", "%systemroot%\\Temp");
-    map.insert("Кэш Opera", "%homepath%\\AppData\\Local\\Opera Software\\Opera Stable\\Cache");
-    map.insert("Кэш Gogle Chrome", "%homepath%\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cache");
-    map.insert("Кэш Яндекса", "%homepath%\\AppData\\Local\\Yandex\\YandexBrowser\\User Data\\Default\\Cache");
-    map.insert("Кэш Mozilla Firefox", "%homepath%\\AppData\\Local\\Mozilla\\Firefox\\Profiles\\PROF.default\\cache2\\entries");
-    map.insert("Кэш Microsoft Edge", "%homepath%\\AppData\\Local\\Microsoft\Edge\\User Data\\Default\\Cache");
-    map.insert("Очистить корзину", "C:\\$RECYCLE.BIN");
-    //ConfigLoader::writeConfig(map, "config.json");
 }
 
 void MainWindow::checkAllCb()

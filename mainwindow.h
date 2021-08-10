@@ -35,7 +35,6 @@ private:
     QMap<QString, QString> *configMap;
     QList<QCheckBox*> myCboxes;
     QList<QLabel*> myLabels;
-    void createConfig();
     void checkAllCb();
     void unCheckAllCb();
 };
