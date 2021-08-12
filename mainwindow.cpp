@@ -22,12 +22,14 @@ MainWindow::MainWindow(QWidget *parent)
         DirInfo DI;
         FolderChecker::isExistDir(cb, it.value(), DI);
         QLabel *lab = new QLabel(this);
-        QString labStr = "Найдено " + QString::number(DI.allItem) + " элементов " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб";
+        QString labStr = "Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб";
         myLabels.append(lab);
         if(!DI.dirC && !DI.filesC && !DI.size && !DI.allItem)
         {
             labStr = "Нечего удалять";
         }
+        if (it.value().contains("$RECYCLE.BIN"))
+            labStr = "Очистить корзину";
         lab->setText(labStr);
         cbLayout->addWidget(cb, count, 0);
         cbLayout->addWidget(lab, count, 1);

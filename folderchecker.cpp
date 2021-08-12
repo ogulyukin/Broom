@@ -5,18 +5,16 @@
 void FolderChecker::isExistDir(QCheckBox* cb, QString path, DirInfo &DI)
 {
     QDir *dir = new QDir(path);
-    if(!dir->exists(path))
+    if(!dir->exists(path) && !path.contains("$RECYCLE.BIN"))
     {
         cb->setDisabled(true);
         delete dir;
         return;
     }
     DI.size = 0;
-    DI.filesC = 0;
     DI.dirC = 0;
     DI.allItem = dir->count();
-    DI.filesC += fileCountsCollector(path, DI.dirC, DI.size, DI.allItem);
-    //qDebug() << " Найдено: " << DI.filesC << " файлов, " << DI.dirC << " папок." << "Объем: " << DI.size;
+    DI.filesC = fileCountsCollector(path, DI.dirC, DI.size);
     delete dir;
     return;
 }
@@ -30,12 +28,18 @@ void FolderChecker::deleteFiles(QString path)
 
 void FolderChecker::run()
 {
+    if(path.contains("$RECYCLE.BIN"))
+    {
+        emit sendMsg("УСПЕХ","Удаление", QThread::currentThread()->objectName() + "Очистка Корзины");
+        SHEmptyRecycleBin(0,0,SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND);
+        return;
+    }
     emit sendMsg("ИНФО", "Удаление", QThread::currentThread()->objectName() + " Начинаем удаление файлов:");
     deleteTargets(path, path);
     emit sendMsg("ИНФО", "Удаление", QThread::currentThread()->objectName() + " Удаление файлов завершено");
 }
 
-int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC, int &otherC)
+int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC)
 {
     QDir *dir = new QDir(path);
     QList<QFileInfo> fileList = dir->entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden);
@@ -45,14 +49,13 @@ int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC, int 
     {
         if(it->isDir())
         {
-            result += fileCountsCollector(it->absoluteFilePath(), dirC, sizeC, otherC);
+            result += fileCountsCollector(it->absoluteFilePath(), dirC, sizeC);
             dirC++;
         }else if(it->isFile())
         {
             result++;
             sizeC += it->size();
         }
-            otherC += dir->count();
     }
     delete dir;
     return result;
