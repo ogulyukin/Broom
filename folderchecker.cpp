@@ -91,6 +91,7 @@ void FolderChecker::deleteTargets(QString path, QString ignore)
            //qDebug() << "ERROR: deletion: " << path;
             emit sendMsg("ОШИБКА","Удаление", path);
         }
+        emit deleted();
     }
     delete dir;
 }
@@ -106,6 +107,7 @@ void FolderChecker::printResult(QFileInfo &it)
        //qDebug() << "Error deletion: " << it.absoluteFilePath();
         emit sendMsg("ОШИБКА","Удаление",it.absoluteFilePath());
     }
+    emit deleted();
 }
 
 FolderChecker::FolderChecker(QString path, QObject *parent): QObject(parent), QRunnable(), path(path)

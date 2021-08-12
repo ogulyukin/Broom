@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     QMainWindow::setWindowTitle("Broom. Уборка мусора на вашем компе");
     log = new Logger(ui->textBrowser, ui->statusbar, this);
     connect(this, &MainWindow::sendMsg, log, &Logger::addMessage);
+    connect(&timer, &QTimer::timeout, this, &MainWindow::finishProgressBar);
     emit sendMsg("ИНФО", "Запуск программы", "Считано " + QString::number(configMap->size()) + " записей кофигурационного файла");
     QMap<QString, QString>::iterator it;
     QGridLayout *cbLayout = new QGridLayout(this);
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
         FolderChecker::isExistDir(cb, it.value(), DI);
         QLabel *lab = new QLabel(this);
         QString labStr = "Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб";
+        foundElements.insert(it.key(), DI.filesC + DI.dirC);
         myLabels.append(lab);
         if(!DI.dirC && !DI.filesC && !DI.size && !DI.allItem)
         {
@@ -37,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
     ui->groupBox->setLayout(cbLayout);
     ui->tabWidget->setCurrentWidget(ui->tab);
+    ui->progressBar->setValue(0);
 }
 
 MainWindow::~MainWindow()
@@ -54,31 +57,40 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    ui->tabWidget->setCurrentWidget(ui->tab_2);
-    QThreadPool *pool = QThreadPool::globalInstance();
-    for (int i = 0; i < myCboxes.size(); i++)
+    calculateAllElementsSelected();
+    if(AllElementsSelected > 0)
     {
-        if(myCboxes.at(i)->isChecked())
+        QThreadPool *pool = QThreadPool::globalInstance();
+        for (int i = 0; i < myCboxes.size(); i++)
         {
-            FolderChecker *fc = new FolderChecker(configMap->value(myCboxes.at(i)->text()), this);
-            //fc->setObjectName("Поток № " + QString::number(i));
-            connect(fc, &FolderChecker::sendMsg, log, &Logger::addMessage);
-            fc->setAutoDelete(true);
-            pool->start(fc);
+            if(myCboxes.at(i)->isChecked())
+            {
+                FolderChecker *fc = new FolderChecker(configMap->value(myCboxes.at(i)->text()), this);
+                connect(fc, &FolderChecker::sendMsg, log, &Logger::addMessage);
+                connect(fc, &FolderChecker::deleted, this, &MainWindow::deleteCounter);
+                fc->setAutoDelete(true);
+                pool->start(fc);
+            }
+        }
+        pool->waitForDone();
+        QMap<QString, QString>::iterator it;
+        int count = 0;
+        for(it = configMap->begin(); it != configMap->end(); it++)
+        {
+            DirInfo DI;
+            FolderChecker::isExistDir(myCboxes.at(count), it.value(), DI);
+            myLabels.at(count)->setText("Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб");
+            count++;
         }
     }
-    pool->waitForDone();
-     QMap<QString, QString>::iterator it;
-     int count = 0;
-     for(it = configMap->begin(); it != configMap->end(); it++)
-     {
-         DirInfo DI;
-         FolderChecker::isExistDir(myCboxes.at(count), it.value(), DI);
-         myLabels.at(count)->setText("Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб");
-         count++;
-     }
-     ui->tabWidget->setCurrentWidget(ui->tab);
-     QMessageBox::information(this, "Информация", "Задания по удалению завершены!");
+    unCheckAllCb();
+    ui->cbAll->setChecked(false);
+    //AllElementsSelected = 0;
+    //deletedCount = AllElementsSelected;
+    timer.setInterval(3000);
+    timer.start();
+    //ui->progressBar->setValue(100);
+    //QMessageBox::information(this, "Информация", "Задания по удалению завершены!");
 }
 
 void MainWindow::checkAllCb()
@@ -97,6 +109,22 @@ void MainWindow::unCheckAllCb()
         if(myCboxes.at(i)->isEnabled())
             myCboxes.at(i)->setChecked(false);
     }
+}
+
+void MainWindow::calculateAllElementsSelected()
+{
+     AllElementsSelected = 0;
+     deletedCount = 0;
+     ui->progressBar->setValue(0);
+     _tic = 0;
+    for (int i = 0; i < myCboxes.size(); i++)
+    {
+        if(myCboxes.at(i)->isChecked())
+        {
+            AllElementsSelected += foundElements.value(myCboxes.at(i)->text());
+        }
+    }
+    emit sendMsg("ИНФО", "Подготовка", "Всего Элементов к удалению: " + QString::number(AllElementsSelected));
 }
 
 
@@ -129,5 +157,20 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_clearLogButton_clicked()
 {
     ui->textBrowser->clear();
+}
+
+void MainWindow::deleteCounter()
+{
+    deletedCount++;
+    //qDebug() << "deletedCount = " + QString::number(deletedCount) + "AllElementSelected = " + QString::number(AllElementsSelected);
+    if (AllElementsSelected == 0)
+        return;
+    //emit sendMsg("ИНФО", "ПРОВЕРКА", "deletedCount = " + QString::number(deletedCount) + "AllElementSelected = " + QString::number(AllElementsSelected));
+    ui->progressBar->setValue(deletedCount * 100/(AllElementsSelected == 0 ? 1 : AllElementsSelected));
+}
+
+void MainWindow::finishProgressBar()
+{
+    ui->progressBar->setValue(100);
 }
 
