@@ -14,6 +14,7 @@
 #include <QGridLayout>
 #include <QMessageBox>
 #include <QThreadPool>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -42,12 +43,22 @@ private slots:
 
     void on_clearLogButton_clicked();
 
+public slots:
+    void deleteCounter();
+    void finishProgressBar();
+
 private:
     Ui::MainWindow *ui;
     QMap<QString, QString> *configMap;
     QList<QCheckBox*> myCboxes;
     QList<QLabel*> myLabels;
+    QMap<QString, int> foundElements;
+    int AllElementsSelected;
+    int _tic;
+    QTimer timer;
+    int deletedCount;
     void checkAllCb();
     void unCheckAllCb();
+    void calculateAllElementsSelected();
 };
 #endif // MAINWINDOW_H

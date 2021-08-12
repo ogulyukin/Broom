@@ -27,6 +27,7 @@ public:
 
 signals:
     void sendMsg(QString type, QString actions, QString msg);
+    void deleted();
 
 public slots:
 
