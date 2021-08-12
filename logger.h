@@ -5,15 +5,23 @@
 #include <QDir>
 #include <QString>
 #include <QStatusBar>
+#include <QSet>
 
-class Logger
+class Logger: public QObject
 {
+    Q_OBJECT
     QTextBrowser *view;
     QStatusBar *statusbar;
     void execMessage(QString message);
+    QString getTypeMessage(QString mesg);
+    QString filename;
+
 public:
-    Logger(QTextBrowser *view, QStatusBar *statusbar);
-    void addEvent(QString type, QString action, QString message);
+    Logger(QTextBrowser *view, QStatusBar *statusbar, QObject *parent = nullptr);
+
+public slots:
+    void addMessage(QString type, QString action, QString message);
 };
+
 
 #endif // LOGGER_H

@@ -25,12 +25,7 @@ QMap<QString, QString>* ConfigLoader::readConfig(QString path)
         map->insert(key, getPath(tempMap.value(key).toString()));
     }
     QMap<QString, QString>::Iterator it;
-//    for(it = map->begin(); it != map->end(); it++)
-//    {
-//        qDebug() << "map key: " << it.key() << " map value: " << it.value();
-//    }
     return map;
-
 }
 
 void ConfigLoader::writeConfig(QMap<QString, QString> &map, QString path)

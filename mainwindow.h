@@ -5,6 +5,15 @@
 #include <QCheckBox>
 #include <QLabel>
 #include "logger.h"
+#include <QThread>
+#include "ui_mainwindow.h"
+#include "configloader.h"
+#include "folderchecker.h"
+#include "dirinfo.h"
+#include <QDebug>
+#include <QGridLayout>
+#include <QMessageBox>
+#include <QThreadPool>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,6 +27,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     Logger *log;
+
+signals:
+    void sendMsg(QString type, QString actions, QString msg);
 
 private slots:
     void on_pushButton_clicked();
