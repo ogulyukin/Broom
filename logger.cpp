@@ -5,17 +5,29 @@
 void Logger::execMessage(QString message)
 {
     view->append(message);
-    //statusbar->showMessage(message, 10000);
+    //statusbar->showMessage(message);
 }
 
-Logger::Logger(QTextBrowser *view, QStatusBar *statusbar) : view(view), statusbar(statusbar)
+QString Logger::getTypeMessage(QString msg)
 {
-
+    if(msg == "УСПЕХ")
+        msg = "<font color = \"green\"><b>УСПЕХ</b></font>";
+    if(msg == "ОШИБКА")
+        msg = "<font color = \"red\"><b>ОШИБКА</b></font>";
+    if(msg == "ИНФО")
+        msg = "<font color = \"yellow\"><b>ИНФО</b></font>";
+    return msg;
 }
 
-void Logger::addEvent(QString type, QString action, QString message)
+Logger::Logger(QTextBrowser *view, QStatusBar *statusbar, QObject *parent) :  QObject(parent), view(view), statusbar(statusbar)
 {
-    execMessage(QDateTime::currentDateTime().toString() + " " + type + " " + action + " " + message);
+    filename = QDir::currentPath() + QDir::separator() + "log.txt";
+}
+
+void Logger::addMessage(QString type, QString action, QString message)
+{
+
+    execMessage(QDateTime::currentDateTime().toString() + " " + getTypeMessage(type) + " " + action + " " + message);
     QFile file("log.txt");
     if(!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
     {

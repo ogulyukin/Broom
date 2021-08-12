@@ -1,21 +1,33 @@
 #ifndef FOLDERCHECKER_H
 #define FOLDERCHECKER_H
+
 #include <QString>
 #include <QCheckBox>
 #include <QDir>
+#include <QThread>
+#include <QRunnable>
 #include "dirinfo.h"
 #include "logger.h"
-class FolderChecker
+
+class FolderChecker : public QObject, public QRunnable
 {
+    Q_OBJECT
     static int fileCountsCollector(QString path, int &dirC, int &sizeC, int &otherC);
-    static void qListSum(QList<QFileInfo>* list, QList<QFileInfo> *other);
-    //static void getIteratorPos(QList<QFileInfo>::iterator &it);
-    static void collectTargets(QString path, QString ignore, Logger *log);
-    static void printResult(QFileInfo &it, Logger *log);
+    void deleteTargets(QString path, QString ignore);
+    void printResult(QFileInfo &it);
+    QString path;
+
 public:
+    explicit FolderChecker(QString path, QObject *parent = nullptr);
     static void isExistDir(QCheckBox* cb, QString path, DirInfo &DI);
-    static void deleteFiles(QString path, Logger *log);
-    //FolderChecker();
+    void deleteFiles(QString path);
+    void run();
+
+signals:
+    void sendMsg(QString type, QString actions, QString msg);
+
+public slots:
+
 };
 
 #endif // FOLDERCHECKER_H

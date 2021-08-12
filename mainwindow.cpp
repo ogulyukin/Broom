@@ -1,11 +1,4 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include "configloader.h"
-#include "folderchecker.h"
-#include "dirinfo.h"
-#include <QDebug>
-#include <QGridLayout>
-#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,8 +8,9 @@ MainWindow::MainWindow(QWidget *parent)
     //qDebug() << "Всего считано полей: " << configMap->size();
     ui->setupUi(this);
     QMainWindow::setWindowTitle("Broom. Уборка мусора на вашем компе");
-    log = new Logger(ui->textBrowser, ui->statusbar);
-    log->addEvent("<font color = \"yellow\"><b>ИНФО</b></font>", "Запуск программы", "Считано " + QString::number(configMap->size()) + " записей кофигурационного файла");
+    log = new Logger(ui->textBrowser, ui->statusbar, this);
+    connect(this, &MainWindow::sendMsg, log, &Logger::addMessage);
+    emit sendMsg("ИНФО", "Запуск программы", "Считано " + QString::number(configMap->size()) + " записей кофигурационного файла");
     QMap<QString, QString>::iterator it;
     QGridLayout *cbLayout = new QGridLayout(this);
     cbLayout->addWidget(ui->cbAll);
@@ -28,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
         DirInfo DI;
         FolderChecker::isExistDir(cb, it.value(), DI);
         QLabel *lab = new QLabel(this);
-        QString labStr = "Найдено " + QString::number(DI.allItem) + " элементов " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size) + " байт";
+        QString labStr = "Найдено " + QString::number(DI.allItem) + " элементов " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб";
         myLabels.append(lab);
         if(!DI.dirC && !DI.filesC && !DI.size && !DI.allItem)
         {
@@ -45,11 +39,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    for (int i = 0; i < myCboxes.size(); i++)
-    {
-        delete myCboxes.at(i);
-        delete myLabels.at(i);
-    }
+    qDeleteAll(myCboxes);
+    qDeleteAll(myLabels);
+    //qDeleteAll(fcList);
+    myCboxes.clear();
+    myLabels.clear();
+    //fcList.clear();
     delete log;
     delete ui;    
 }
@@ -58,21 +53,26 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     ui->tabWidget->setCurrentWidget(ui->tab_2);
+    QThreadPool *pool = QThreadPool::globalInstance();
     for (int i = 0; i < myCboxes.size(); i++)
     {
         if(myCboxes.at(i)->isChecked())
         {
-            //qDebug() << "Begin deleting " << configMap->value(myCboxes.at(i)->text());
-            FolderChecker::deleteFiles(configMap->value(myCboxes.at(i)->text()), log);
+            FolderChecker *fc = new FolderChecker(configMap->value(myCboxes.at(i)->text()), this);
+            //fc->setObjectName("Поток № " + QString::number(i));
+            connect(fc, &FolderChecker::sendMsg, log, &Logger::addMessage);
+            fc->setAutoDelete(true);
+            pool->start(fc);
         }
     }
+    pool->waitForDone();
      QMap<QString, QString>::iterator it;
      int count = 0;
      for(it = configMap->begin(); it != configMap->end(); it++)
      {
          DirInfo DI;
          FolderChecker::isExistDir(myCboxes.at(count), it.value(), DI);
-         myLabels.at(count)->setText("Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size) + " байт");
+         myLabels.at(count)->setText("Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб");
          count++;
      }
      ui->tabWidget->setCurrentWidget(ui->tab);
@@ -100,6 +100,7 @@ void MainWindow::unCheckAllCb()
 
 void MainWindow::on_cbAll_stateChanged(int arg1)
 {
+    Q_UNUSED(arg1);
     if(ui->cbAll->isChecked())
     {
         checkAllCb();

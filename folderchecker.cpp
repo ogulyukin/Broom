@@ -1,6 +1,7 @@
 #include "folderchecker.h"
 #include <QFile>
 #include <QDebug>
+
 void FolderChecker::isExistDir(QCheckBox* cb, QString path, DirInfo &DI)
 {
     QDir *dir = new QDir(path);
@@ -10,7 +11,6 @@ void FolderChecker::isExistDir(QCheckBox* cb, QString path, DirInfo &DI)
         delete dir;
         return;
     }
-    //dirInfoCollector(dir, DI);
     DI.size = 0;
     DI.filesC = 0;
     DI.dirC = 0;
@@ -21,11 +21,18 @@ void FolderChecker::isExistDir(QCheckBox* cb, QString path, DirInfo &DI)
     return;
 }
 
-void FolderChecker::deleteFiles(QString path, Logger *log)
+void FolderChecker::deleteFiles(QString path)
 {
-    log->addEvent("<font color = \"yellow\"><b>ИНФО</b></font>", "Удаление", "Начинаем удаление файлов:");
-    collectTargets(path, path, log);
-    log->addEvent("<font color = \"yellow\"><b>ИНФО</b></font>", "Удаление", "Удаление файлов завершено");
+    emit sendMsg("ИНФО", "Удаление", "Начинаем удаление файлов:");
+    deleteTargets(path, path);
+    emit sendMsg("ИНФО", "Удаление", "Удаление файлов завершено");
+}
+
+void FolderChecker::run()
+{
+    emit sendMsg("ИНФО", "Удаление", QThread::currentThread()->objectName() + " Начинаем удаление файлов:");
+    deleteTargets(path, path);
+    emit sendMsg("ИНФО", "Удаление", QThread::currentThread()->objectName() + " Удаление файлов завершено");
 }
 
 int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC, int &otherC)
@@ -33,7 +40,6 @@ int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC, int 
     QDir *dir = new QDir(path);
     QList<QFileInfo> fileList = dir->entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden);
     QList<QFileInfo>::iterator it = fileList.begin();
-    //getIteratorPos(it);
     int result = 0;
     for(; it != fileList.end(); it++)
     {
@@ -52,39 +58,22 @@ int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC, int 
     return result;
 }
 
-void FolderChecker::qListSum(QList<QFileInfo> *list, QList<QFileInfo> *other)
-{
-    QList<QFileInfo>::iterator it = other->begin();
-    for (; it != other->end(); it++)
-    {
-        list->append(*it);
-    }
-    delete other;
-}
-
-//void FolderChecker::getIteratorPos(QList<QFileInfo>::iterator &it)
-//{
-//  it++;
-//  it++;
-//}
-
-void FolderChecker::collectTargets(QString path, QString ignore, Logger *log)
+void FolderChecker::deleteTargets(QString path, QString ignore)
 {
     QDir *dir = new QDir(path);
     QFileInfoList list = dir->entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden);
     QFileInfoList::iterator it = list.begin();
-    //getIteratorPos(it);
     for (; it != list.end(); it++)
     {
         qDebug() << it->absoluteFilePath();
         if(it->isDir() && it->exists())
         {
-            collectTargets(it->absoluteFilePath(), ignore, log);
+            deleteTargets(it->absoluteFilePath(), ignore);
         }else if(it->exists())
         {
             QFile::setPermissions(it->absoluteFilePath(), QFile::ReadOwner | QFile::WriteOwner);
             QFile::remove(it->absoluteFilePath());
-            printResult(*it, log);
+            printResult(*it);
         }
     }
     if(path != ignore && dir->exists(path))
@@ -93,33 +82,31 @@ void FolderChecker::collectTargets(QString path, QString ignore, Logger *log)
         if(!dir->exists(path))
         {
            //qDebug() << "SUCESS deletion: " << path;
-            log->addEvent("<font color = \"green\"><b>УСПЕХ</b></font>","Удаление", path);
+            emit sendMsg("УСПЕХ","Удаление", path);
         }else
         {
            //qDebug() << "ERROR: deletion: " << path;
-            log->addEvent("<font color = \"red\"><b>ОШИБКА</b></font>","Удаление", path);
+            emit sendMsg("ОШИБКА","Удаление", path);
         }
     }
     delete dir;
 }
 
-void FolderChecker::printResult(QFileInfo &it, Logger *log)
+void FolderChecker::printResult(QFileInfo &it)
 {
-
     if(!QFile::exists(it.absoluteFilePath()))
     {
        //qDebug() << "Secces deletion: " << it.absoluteFilePath();
-        log->addEvent("<font color = \"green\"><b>УСПЕХ</b></font>","Удаление",it.absoluteFilePath());
-
+        emit sendMsg("УСПЕХ","Удаление",it.absoluteFilePath());
     }else
     {
        //qDebug() << "Error deletion: " << it.absoluteFilePath();
-        log->addEvent("<font color = \"red\"><b>ОШИБКА</b></font>","Удаление",it.absoluteFilePath());
-
+        emit sendMsg("ОШИБКА","Удаление",it.absoluteFilePath());
     }
 }
 
-//FolderChecker::FolderChecker()
-//{
+FolderChecker::FolderChecker(QString path, QObject *parent): QObject(parent), QRunnable(), path(path)
+{
 
-//}
+}
+
