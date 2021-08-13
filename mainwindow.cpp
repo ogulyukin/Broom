@@ -26,12 +26,16 @@ MainWindow::MainWindow(QWidget *parent)
         QString labStr = "Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб";
         foundElements.insert(it.key(), DI.filesC + DI.dirC);
         myLabels.append(lab);
-        if(!DI.dirC && !DI.filesC && !DI.size && !DI.allItem)
+        if(!DI.dirC && !DI.filesC && !DI.size)
         {
             labStr = "Нечего удалять";
+            cb->setDisabled(true);
         }
         if (it.value().contains("$RECYCLE.BIN"))
+        {
             labStr = "Очистить корзину";
+            cb->setEnabled(true);
+        }
         lab->setText(labStr);
         cbLayout->addWidget(cb, count, 0);
         cbLayout->addWidget(lab, count, 1);
@@ -75,11 +79,28 @@ void MainWindow::on_pushButton_clicked()
         pool->waitForDone();
         QMap<QString, QString>::iterator it;
         int count = 0;
+        foundElements.clear();
         for(it = configMap->begin(); it != configMap->end(); it++)
         {
             DirInfo DI;
-            FolderChecker::isExistDir(myCboxes.at(count), it.value(), DI);
-            myLabels.at(count)->setText("Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб");
+            FolderChecker::isExistDir(myCboxes.at(count), it.value(), DI);        
+            if(!DI.dirC && !DI.filesC && !DI.size)
+            {
+                if (it.value().contains("$RECYCLE.BIN"))
+                {
+                    myLabels.at(count)->setText("Очистить корзину");
+                    myCboxes.at(count)->setEnabled(true);
+                }else
+                {
+                    myLabels.at(count)->setText("Нечего удалять");
+                    myCboxes.at(count)->setDisabled(true);
+                }
+            }else
+            {
+                myLabels.at(count)->setText("Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб");
+                myCboxes.at(count)->setEnabled(true);
+            }
+            foundElements.insert(it.key(),DI.filesC + DI.dirC);
             count++;
         }
     }
@@ -126,7 +147,6 @@ void MainWindow::calculateAllElementsSelected()
     }
     emit sendMsg("ИНФО", "Подготовка", "Всего Элементов к удалению: " + QString::number(AllElementsSelected));
 }
-
 
 void MainWindow::on_cbAll_stateChanged(int arg1)
 {
