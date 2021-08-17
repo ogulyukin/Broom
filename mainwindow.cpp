@@ -108,7 +108,7 @@ void MainWindow::on_pushButton_clicked()
     ui->cbAll->setChecked(false);
     //AllElementsSelected = 0;
     //deletedCount = AllElementsSelected;
-    timer.setInterval(3000);
+    timer.setInterval(2000);
     timer.start();
     //ui->progressBar->setValue(100);
     //QMessageBox::information(this, "Информация", "Задания по удалению завершены!");
