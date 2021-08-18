@@ -17,7 +17,7 @@ class Logger: public QObject
     QString filename;
 
 public:
-    Logger(QTextBrowser *view, QStatusBar *statusbar, QObject *parent = nullptr);
+    Logger(QTextBrowser *view, QObject *parent = nullptr);
 
 public slots:
     void addMessage(QString type, QString action, QString message);

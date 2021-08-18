@@ -2,19 +2,17 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QCheckBox>
-#include <QLabel>
 #include "logger.h"
-#include <QThread>
 #include "ui_mainwindow.h"
 #include "configloader.h"
-#include "folderchecker.h"
-#include "dirinfo.h"
 #include <QDebug>
 #include <QGridLayout>
 #include <QMessageBox>
 #include <QThreadPool>
 #include <QTimer>
+#include "reciclebintask.h"
+#include "userpathtask.h"
+#include "taskthread.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -50,9 +48,10 @@ public slots:
 private:
     Ui::MainWindow *ui;
     QMap<QString, QString> *configMap;
-    QList<QCheckBox*> myCboxes;
-    QList<QLabel*> myLabels;
-    QMap<QString, int> foundElements;
+    QList<TaskObject*> taskList;
+    //QList<QCheckBox*> myCboxes;
+    //QList<QLabel*> myLabels;
+    //QMap<QString, int> foundElements;
     int AllElementsSelected;
     int _tic;
     QTimer timer;

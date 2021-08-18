@@ -1,45 +1,45 @@
-#include "folderchecker.h"
-#include <QFile>
-#include <QDebug>
+#include "userpathtask.h"
 
-void FolderChecker::isExistDir(QCheckBox* cb, QString path, DirInfo &DI)
+UserPAthTask::UserPAthTask(QCheckBox* cb, QLabel* lab, QString path, QObject *parent) : TaskObject(cb, lab, path, parent)
 {
-    QDir *dir = new QDir(path);
-    if(!dir->exists(path) && !path.contains("$RECYCLE.BIN"))
+    if(isExistDir())
     {
-        cb->setDisabled(true);
-        delete dir;
-        return;
+       DirInfo* DI = new DirInfo();
+       DI->filesC = fileCountsCollector(path, DI->dirC, DI->size);
+       if(DI->dirC == 0 && DI->filesC == 0)
+       {
+           lab->setText("Нечего удалять");
+           cb->setDisabled(true);
+       }else
+       {
+           lab->setText("Найдено " + QString::number(DI->filesC) + " файлов, " + QString::number(DI->dirC) + " папок, " + QString::number(DI->size/1024/1024) + " Мб");
+       }
+       elements = DI->filesC + DI->dirC;
+       delete  DI;
     }
-    DI.size = 0;
-    DI.dirC = 0;
-    DI.allItem = dir->count();
-    DI.filesC = fileCountsCollector(path, DI.dirC, DI.size);
-    delete dir;
-    return;
 }
 
-void FolderChecker::deleteFiles(QString path)
+void UserPAthTask::run()
 {
-    emit sendMsg("ИНФО", "Удаление", "Начинаем удаление файлов:");
-    deleteTargets(path, path);
-    emit sendMsg("ИНФО", "Удаление", "Удаление файлов завершено");
-}
-
-void FolderChecker::run()
-{
-    if(path.contains("$RECYCLE.BIN"))
-    {
-        emit sendMsg("УСПЕХ","Удаление", QThread::currentThread()->objectName() + "Очистка Корзины");
-        SHEmptyRecycleBin(0,0,SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND);
-        return;
-    }
     emit sendMsg("ИНФО", "Удаление", QThread::currentThread()->objectName() + " Начинаем удаление файлов:");
     deleteTargets(path, path);
+    DirInfo* DI = new DirInfo();
+    DI->filesC = fileCountsCollector(path, DI->dirC, DI->size);
+    if(DI->dirC == 0 && DI->filesC == 0)
+    {
+        lab->setText("Нечего удалять");
+        cb->setDisabled(true);
+    }else
+    {
+        lab->setText("Найдено " + QString::number(DI->filesC) + " файлов, " + QString::number(DI->dirC) + " папок, " + QString::number(DI->size/1024/1024) + " Мб");
+    }
+    cb->setChecked(false);
+    elements = DI->filesC + DI->dirC;
+    delete  DI;
     emit sendMsg("ИНФО", "Удаление", QThread::currentThread()->objectName() + " Удаление файлов завершено");
 }
 
-int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC)
+int UserPAthTask::fileCountsCollector(QString path, int &dirC, int &sizeC)
 {
     QDir *dir = new QDir(path);
     QList<QFileInfo> fileList = dir->entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden);
@@ -61,7 +61,7 @@ int FolderChecker::fileCountsCollector(QString path, int &dirC, int &sizeC)
     return result;
 }
 
-void FolderChecker::deleteTargets(QString path, QString ignore)
+void UserPAthTask::deleteTargets(QString path, QString ignore)
 {
     QDir *dir = new QDir(path);
     QFileInfoList list = dir->entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden);
@@ -84,11 +84,9 @@ void FolderChecker::deleteTargets(QString path, QString ignore)
         dir->rmdir(path);
         if(!dir->exists(path))
         {
-           //qDebug() << "SUCESS deletion: " << path;
             emit sendMsg("УСПЕХ","Удаление", path);
         }else
         {
-           //qDebug() << "ERROR: deletion: " << path;
             emit sendMsg("ОШИБКА","Удаление", path);
         }
         emit deleted();
@@ -96,22 +94,26 @@ void FolderChecker::deleteTargets(QString path, QString ignore)
     delete dir;
 }
 
-void FolderChecker::printResult(QFileInfo &it)
+void UserPAthTask::printResult(QFileInfo &it)
 {
     if(!QFile::exists(it.absoluteFilePath()))
     {
-       //qDebug() << "Secces deletion: " << it.absoluteFilePath();
         emit sendMsg("УСПЕХ","Удаление",it.absoluteFilePath());
     }else
     {
-       //qDebug() << "Error deletion: " << it.absoluteFilePath();
         emit sendMsg("ОШИБКА","Удаление",it.absoluteFilePath());
     }
     emit deleted();
 }
 
-FolderChecker::FolderChecker(QString path, QObject *parent): QObject(parent), QRunnable(), path(path)
+bool UserPAthTask::isExistDir()
 {
-
+    QDir *dir = new QDir(path);
+    if(!dir->exists(path))
+    {
+        cb->setDisabled(true);
+        lab->setText("Нечего удалять");
+    }
+    delete dir;
+    return cb->isEnabled();
 }
-

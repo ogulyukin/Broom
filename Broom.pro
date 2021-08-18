@@ -12,17 +12,23 @@ CONFIG += c++11
 SOURCES += \
     configloader.cpp \
     dirinfo.cpp \
-    folderchecker.cpp \
     logger.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    reciclebintask.cpp \
+    taskobject.cpp \
+    taskthread.cpp \
+    userpathtask.cpp
 
 HEADERS += \
     configloader.h \
     dirinfo.h \
-    folderchecker.h \
     logger.h \
-    mainwindow.h
+    mainwindow.h \
+    reciclebintask.h \
+    taskobject.h \
+    taskthread.h \
+    userpathtask.h
 
 FORMS += \
     mainwindow.ui
