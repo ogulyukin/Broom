@@ -5,7 +5,6 @@
 void Logger::execMessage(QString message)
 {
     view->append(message);
-    //statusbar->showMessage(message);
 }
 
 QString Logger::getTypeMessage(QString msg)
@@ -19,7 +18,7 @@ QString Logger::getTypeMessage(QString msg)
     return msg;
 }
 
-Logger::Logger(QTextBrowser *view, QStatusBar *statusbar, QObject *parent) :  QObject(parent), view(view), statusbar(statusbar)
+Logger::Logger(QTextBrowser *view, QObject *parent) :  QObject(parent), view(view)
 {
     filename = QDir::currentPath() + QDir::separator() + "log.txt";
 }

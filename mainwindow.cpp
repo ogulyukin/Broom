@@ -5,38 +5,34 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     configMap = ConfigLoader::readConfig("config.json");
-    //qDebug() << "Всего считано полей: " << configMap->size();
     ui->setupUi(this);
     QMainWindow::setWindowTitle("Broom. Уборка мусора на вашем компе");
-    log = new Logger(ui->textBrowser, ui->statusbar, this);
+    log = new Logger(ui->textBrowser, this);
     connect(this, &MainWindow::sendMsg, log, &Logger::addMessage);
     connect(&timer, &QTimer::timeout, this, &MainWindow::finishProgressBar);
     emit sendMsg("ИНФО", "Запуск программы", "Считано " + QString::number(configMap->size()) + " записей кофигурационного файла");
     QMap<QString, QString>::iterator it;
     QGridLayout *cbLayout = new QGridLayout(this);
     cbLayout->addWidget(ui->cbAll);
-    int count = 1;
+    //Recicle Bin
+    QCheckBox *rcb = new QCheckBox("Очистка корзины", ui->groupBox);
+    QLabel *rlab = new QLabel(this);
+    TaskObject* task = new RecicleBinTask(rcb, rlab, "", this);
+    taskList.append(task);
+    connect(task, &TaskObject::sendMsg, log, &Logger::addMessage, Qt::QueuedConnection);
+    connect(task, &TaskObject::deleted, this, &MainWindow::deleteCounter, Qt::QueuedConnection);
+    cbLayout->addWidget(rcb, 1, 0);
+    cbLayout->addWidget(rlab, 1, 1);
+    //UserPath
+    int count = 2;
     for(it = configMap->begin(); it != configMap->end(); it++)
     {
         QCheckBox *cb = new QCheckBox(it.key(),ui->groupBox);
-        myCboxes.append(cb);
-        DirInfo DI;
-        FolderChecker::isExistDir(cb, it.value(), DI);
         QLabel *lab = new QLabel(this);
-        QString labStr = "Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб";
-        foundElements.insert(it.key(), DI.filesC + DI.dirC);
-        myLabels.append(lab);
-        if(!DI.dirC && !DI.filesC && !DI.size)
-        {
-            labStr = "Нечего удалять";
-            cb->setDisabled(true);
-        }
-        if (it.value().contains("$RECYCLE.BIN"))
-        {
-            labStr = "Очистить корзину";
-            cb->setEnabled(true);
-        }
-        lab->setText(labStr);
+        TaskObject* task = new UserPAthTask(cb, lab, it.value(), this);
+        connect(task, &TaskObject::sendMsg, log, &Logger::addMessage, Qt::QueuedConnection);
+        connect(task, &TaskObject::deleted, this, &MainWindow::deleteCounter, Qt::QueuedConnection);
+        taskList.append(task);
         cbLayout->addWidget(cb, count, 0);
         cbLayout->addWidget(lab, count, 1);
         count++;
@@ -48,12 +44,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    qDeleteAll(myCboxes);
-    qDeleteAll(myLabels);
-    //qDeleteAll(fcList);
-    myCboxes.clear();
-    myLabels.clear();
-    //fcList.clear();
+
+    qDeleteAll(taskList);
+    taskList.clear();
     delete log;
     delete ui;    
 }
@@ -65,70 +58,37 @@ void MainWindow::on_pushButton_clicked()
     if(AllElementsSelected > 0)
     {
         QThreadPool *pool = QThreadPool::globalInstance();
-        for (int i = 0; i < myCboxes.size(); i++)
+        foreach(auto i, taskList)
         {
-            if(myCboxes.at(i)->isChecked())
+            if(i->isCheckboxChecked())
             {
-                FolderChecker *fc = new FolderChecker(configMap->value(myCboxes.at(i)->text()), this);
-                connect(fc, &FolderChecker::sendMsg, log, &Logger::addMessage);
-                connect(fc, &FolderChecker::deleted, this, &MainWindow::deleteCounter);
-                fc->setAutoDelete(true);
-                pool->start(fc);
+                i->setAutoDelete(true);
+                pool->start(i);
             }
         }
         pool->waitForDone();
-        QMap<QString, QString>::iterator it;
-        int count = 0;
-        foundElements.clear();
-        for(it = configMap->begin(); it != configMap->end(); it++)
-        {
-            DirInfo DI;
-            FolderChecker::isExistDir(myCboxes.at(count), it.value(), DI);        
-            if(!DI.dirC && !DI.filesC && !DI.size)
-            {
-                if (it.value().contains("$RECYCLE.BIN"))
-                {
-                    myLabels.at(count)->setText("Очистить корзину");
-                    myCboxes.at(count)->setEnabled(true);
-                }else
-                {
-                    myLabels.at(count)->setText("Нечего удалять");
-                    myCboxes.at(count)->setDisabled(true);
-                }
-            }else
-            {
-                myLabels.at(count)->setText("Найдено " + QString::number(DI.filesC) + " файлов, " + QString::number(DI.dirC) + " папок, " + QString::number(DI.size/1024/1024) + " Мб");
-                myCboxes.at(count)->setEnabled(true);
-            }
-            foundElements.insert(it.key(),DI.filesC + DI.dirC);
-            count++;
-        }
     }
-    unCheckAllCb();
     ui->cbAll->setChecked(false);
-    //AllElementsSelected = 0;
-    //deletedCount = AllElementsSelected;
     timer.setInterval(2000);
     timer.start();
-    //ui->progressBar->setValue(100);
     //QMessageBox::information(this, "Информация", "Задания по удалению завершены!");
 }
 
 void MainWindow::checkAllCb()
 {
-    for (int i = 0; i < myCboxes.size(); i++)
+    foreach(auto i, taskList)
     {
-        if(myCboxes.at(i)->isEnabled())
-            myCboxes.at(i)->setChecked(true);
+        if(i->isCheckboxEnabled())
+            i->setCheckBoxChecked();
     }
 }
 
 void MainWindow::unCheckAllCb()
 {
-    for (int i = 0; i < myCboxes.size(); i++)
+    foreach(auto i, taskList)
     {
-        if(myCboxes.at(i)->isEnabled())
-            myCboxes.at(i)->setChecked(false);
+        if(i->isCheckboxEnabled())
+            i->setCheckBoxUnchecked();
     }
 }
 
@@ -138,13 +98,11 @@ void MainWindow::calculateAllElementsSelected()
      deletedCount = 0;
      ui->progressBar->setValue(0);
      _tic = 0;
-    for (int i = 0; i < myCboxes.size(); i++)
-    {
-        if(myCboxes.at(i)->isChecked())
-        {
-            AllElementsSelected += foundElements.value(myCboxes.at(i)->text());
-        }
-    }
+     foreach(auto i, taskList)
+     {
+         if(i->isCheckboxChecked())
+             AllElementsSelected += i->getElements();
+     }
     emit sendMsg("ИНФО", "Подготовка", "Всего Элементов к удалению: " + QString::number(AllElementsSelected));
 }
 
@@ -160,19 +118,15 @@ void MainWindow::on_cbAll_stateChanged(int arg1)
     }
 }
 
-
-
 void MainWindow::on_actionAbout_Qt_triggered()
 {
     QApplication::aboutQt();
 }
 
-
 void MainWindow::on_actionAbout_triggered()
 {
    QMessageBox::information(this, "О программе", "2021 г. О. Гулюкин\nПрограмма очищает мусор на вашем компьютере");
 }
-
 
 void MainWindow::on_clearLogButton_clicked()
 {
