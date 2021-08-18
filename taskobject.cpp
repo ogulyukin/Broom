@@ -1,6 +1,6 @@
 #include "taskobject.h"
 
-TaskObject::TaskObject(QCheckBox *cb, QLabel *lab, QString path, QObject *parent) :QObject(parent), QRunnable()
+TaskObject::TaskObject(QCheckBox *cb, QLabel *lab, QString path, QObject *parent) :QObject(parent)
 {
     this->cb = cb;
     this->lab = lab;

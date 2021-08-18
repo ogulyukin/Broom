@@ -10,9 +10,9 @@
 #include <QMessageBox>
 #include <QThreadPool>
 #include <QTimer>
-#include "recciclebintask.h"
+#include "reciclebintask.h"
 #include "userpathtask.h"
-
+#include "taskthread.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

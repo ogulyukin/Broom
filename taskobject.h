@@ -6,7 +6,7 @@
 #include <QCheckBox>
 #include <QLabel>
 
-class TaskObject : public QObject, public QRunnable
+class TaskObject : public QObject
 {
     Q_OBJECT
 public:

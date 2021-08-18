@@ -1,4 +1,4 @@
-#include "recciclebintask.h"
+#include "reciclebintask.h"
 
 RecicleBinTask::RecicleBinTask(QCheckBox* cb, QLabel* lab, QString path, QObject *parent) : TaskObject(cb, lab, path, parent)
 {

@@ -6,7 +6,14 @@ UserPAthTask::UserPAthTask(QCheckBox* cb, QLabel* lab, QString path, QObject *pa
     {
        DirInfo* DI = new DirInfo();
        DI->filesC = fileCountsCollector(path, DI->dirC, DI->size);
-       lab->setText("Найдено " + QString::number(DI->filesC) + " файлов, " + QString::number(DI->dirC) + " папок, " + QString::number(DI->size/1024/1024) + " Мб");
+       if(DI->dirC == 0 && DI->filesC == 0)
+       {
+           lab->setText("Нечего удалять");
+           cb->setDisabled(true);
+       }else
+       {
+           lab->setText("Найдено " + QString::number(DI->filesC) + " файлов, " + QString::number(DI->dirC) + " папок, " + QString::number(DI->size/1024/1024) + " Мб");
+       }
        elements = DI->filesC + DI->dirC;
        delete  DI;
     }
@@ -21,12 +28,12 @@ void UserPAthTask::run()
     if(DI->dirC == 0 && DI->filesC == 0)
     {
         lab->setText("Нечего удалять");
-        cb->setChecked(false);
         cb->setDisabled(true);
     }else
     {
         lab->setText("Найдено " + QString::number(DI->filesC) + " файлов, " + QString::number(DI->dirC) + " папок, " + QString::number(DI->size/1024/1024) + " Мб");
     }
+    cb->setChecked(false);
     elements = DI->filesC + DI->dirC;
     delete  DI;
     emit sendMsg("ИНФО", "Удаление", QThread::currentThread()->objectName() + " Удаление файлов завершено");

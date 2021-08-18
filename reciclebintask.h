@@ -1,5 +1,5 @@
-#ifndef RECCICLEBINTASK_H
-#define RECCICLEBINTASK_H
+#ifndef RECICLEBINTASK_H
+#define RECICLEBINTASK_H
 #include <windows.h>
 #include <shellapi.h>
 #include <QThread>
@@ -13,4 +13,4 @@ public:
     void run();
 };
 
-#endif // RECCICLEBINTASK_H
+#endif // RECICLEBINTASK_H

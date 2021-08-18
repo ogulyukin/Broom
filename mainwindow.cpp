@@ -45,8 +45,8 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
 
-    qDeleteAll(taskList);
-    taskList.clear();
+    //qDeleteAll(taskList);
+    //taskList.clear();
     delete log;
     delete ui;    
 }
@@ -62,8 +62,9 @@ void MainWindow::on_pushButton_clicked()
         {
             if(i->isCheckboxChecked())
             {
-                i->setAutoDelete(true);
-                pool->start(i);
+                TaskThread *tt = new TaskThread(i);
+                tt->setAutoDelete(true);
+                pool->start(tt);
             }
         }
         pool->waitForDone();

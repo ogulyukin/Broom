@@ -15,8 +15,9 @@ SOURCES += \
     logger.cpp \
     main.cpp \
     mainwindow.cpp \
-    recciclebintask.cpp \
+    reciclebintask.cpp \
     taskobject.cpp \
+    taskthread.cpp \
     userpathtask.cpp
 
 HEADERS += \
@@ -24,8 +25,9 @@ HEADERS += \
     dirinfo.h \
     logger.h \
     mainwindow.h \
-    recciclebintask.h \
+    reciclebintask.h \
     taskobject.h \
+    taskthread.h \
     userpathtask.h
 
 FORMS += \
