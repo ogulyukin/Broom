@@ -11,44 +11,19 @@ QMap<QString, QString>* ConfigLoader::readConfig(QString path)
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly))
     {
-        //qDebug() << "Не открывается файл конфигурации для чтения!";
+        qDebug() << "Не открывается файл конфигурации для чтения!";
         return nullptr;
     }
-    //qDebug() << "Begin serialization";
     QByteArray data = file.readAll();
     file.close();
     QJsonDocument document = QJsonDocument::fromJson(data);
     QVariantMap tempMap = qvariant_cast<QVariantMap>(document["Directories"]);
     QMap<QString, QString>* map = new QMap<QString, QString>;
-    foreach(QString key, tempMap.keys())
+    for (auto it = tempMap.begin(); it != tempMap.end(); it++)
     {
-        map->insert(key, getPath(tempMap.value(key).toString()));
+        map->insert(it.key(), getPath(it.value().toString()));
     }
-    QMap<QString, QString>::Iterator it;
     return map;
-}
-
-void ConfigLoader::writeConfig(QMap<QString, QString> &map, QString path)
-{
-    QVariantMap finallyMap;
-    QVariantMap tempMap;
-    foreach(QString key, map.keys())
-    {
-        tempMap.insert(key, map.value(key));
-        qDebug() << "Key: " << key << " value: " << map.value(key);
-    }
-    finallyMap["Directories"] = QVariant(tempMap);
-    QJsonDocument document = QJsonDocument::fromVariant(finallyMap);
-    QFile file(path);
-    if(!file.open(QIODevice::WriteOnly))
-    {
-        qDebug() << "Не открывается файл конфигурации для записи!";
-        return;
-    }
-    qDebug() << "Begin serialization";
-    file.write(document.toJson());
-    qDebug() << file.fileName();
-    file.close();
 }
 
 QString ConfigLoader::getPath(QString path)
@@ -61,10 +36,6 @@ QString ConfigLoader::getPath(QString path)
     {
         path = qEnvironmentVariable("SYSTEMROOT") + path.remove(0, 11);
     }
+    //qDebug() << path;
     return path;
-}
-
-ConfigLoader::ConfigLoader()
-{
-
 }

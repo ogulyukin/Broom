@@ -2,9 +2,12 @@
 #define TASKOBJECT_H
 
 #include <QObject>
-#include <QRunnable>
 #include <QCheckBox>
 #include <QLabel>
+#include <QDir>
+#include <QDebug>
+#include <QThread>
+#include "dirinfo.h"
 
 class TaskObject : public QObject
 {
@@ -28,6 +31,10 @@ protected:
     QLabel* lab;
     int elements;
     QString path;
+    void emitResult(QFileInfo &it);
+    void dirInfoCollector(QString path, int &fileC, int &dirC, int &sizeC);
+    void clearDirectory(QString path, QString ignore);
+    void removeDirectory(QString path);
 };
 
 #endif // TASKOBJECT_H

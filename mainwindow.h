@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include "logger.h"
@@ -10,9 +11,10 @@
 #include <QMessageBox>
 #include <QThreadPool>
 #include <QTimer>
-#include "reciclebintask.h"
-#include "userpathtask.h"
+#include "tasktrashbox.h"
+#include "taskuserpath.h"
 #include "taskthread.h"
+#include "task1c.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -59,5 +61,6 @@ private:
     void checkAllCb();
     void unCheckAllCb();
     void calculateAllElementsSelected();
+    void connecter(TaskObject* tobj);
 };
 #endif // MAINWINDOW_H
