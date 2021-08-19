@@ -15,20 +15,22 @@ SOURCES += \
     logger.cpp \
     main.cpp \
     mainwindow.cpp \
-    reciclebintask.cpp \
+    task1c.cpp \
     taskobject.cpp \
     taskthread.cpp \
-    userpathtask.cpp
+    tasktrashbox.cpp \
+    taskuserpath.cpp
 
 HEADERS += \
     configloader.h \
     dirinfo.h \
     logger.h \
     mainwindow.h \
-    reciclebintask.h \
+    task1c.h \
     taskobject.h \
     taskthread.h \
-    userpathtask.h
+    tasktrashbox.h \
+    taskuserpath.h
 
 FORMS += \
     mainwindow.ui
