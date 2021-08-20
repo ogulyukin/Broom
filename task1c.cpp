@@ -15,6 +15,7 @@ void task1C::run()
         clearDirectory(*it, *it);
         removeDirectory(*it);
     }
+    cb->setChecked(false);
     foundPath.clear();
     collectExistPath();
     countTargets();
