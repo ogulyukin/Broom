@@ -14,7 +14,7 @@ QString Logger::getTypeMessage(QString msg)
     if(msg == "ОШИБКА")
         msg = "<font color = \"red\"><b>ОШИБКА</b></font>";
     if(msg == "ИНФО")
-        msg = "<font color = \"yellow\"><b>ИНФО</b></font>";
+        msg = "<font color = \"blue\"><b>ИНФО</b></font>";
     return msg;
 }
 
