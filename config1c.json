@@ -1,6 +1,8 @@
 {
     "Directories": {
         "1": "%homepath%\\AppData\\Roaming\\1C\\1cv8",
-        "2": "%homepath%\\AppData\\Local\\1C\\1cv8"
+        "2": "%homepath%\\AppData\\Local\\1C\\1cv8",
+	"3": "%homepath%\\AppData\\Local\\1C\\1Cv82",
+	"4": "%homepath%\\AppData\\Roaming\\\1C\\1Cv82"	
     }
 }
