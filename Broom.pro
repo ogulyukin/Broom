@@ -16,6 +16,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     task1c.cpp \
+    taskmozilla.cpp \
     taskobject.cpp \
     taskthread.cpp \
     tasktrashbox.cpp \
@@ -27,6 +28,7 @@ HEADERS += \
     logger.h \
     mainwindow.h \
     task1c.h \
+    taskmozilla.h \
     taskobject.h \
     taskthread.h \
     tasktrashbox.h \

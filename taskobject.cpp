@@ -76,8 +76,8 @@ void TaskObject::clearDirectory(QString path, QString ignore)
 {
     QDir *dir = new QDir(path);
     QFileInfoList list = dir->entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden);
-    QFileInfoList::iterator it = list.begin();
-    for (; it != list.end(); it++)
+    //QFileInfoList::iterator it = list.begin();
+    for (auto it = list.begin(); it != list.end(); it++)
     {
         qDebug() << it->absoluteFilePath();
         if(it->isDir() && it->exists())

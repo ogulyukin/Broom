@@ -15,6 +15,7 @@
 #include "taskuserpath.h"
 #include "taskthread.h"
 #include "task1c.h"
+#include "taskmozilla.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

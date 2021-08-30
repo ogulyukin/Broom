@@ -35,6 +35,16 @@ MainWindow::MainWindow(QWidget *parent)
     cbLayout->addWidget(clab, count, 1);
     count++;
 
+    //Mozilla
+    QCheckBox *mcb = new QCheckBox("Кэш Mozilla Firefox", ui->groupBox);
+    QLabel *mlab = new QLabel(this);
+    TaskObject* mtask = new taskMozilla(mcb, mlab, "", this);
+    taskList.append(mtask);
+    connecter(mtask);
+    cbLayout->addWidget(mcb, count, 0);
+    cbLayout->addWidget(mlab, count, 1);
+    count++;
+
     //UserPath
     for(auto it = configMap->begin(); it != configMap->end(); it++)
     {

@@ -3,7 +3,6 @@
         "Временные файлы пользователя": "%homepath%\\AppData\\Local\\temp",
         "Кэш Gogle Chrome": "%homepath%\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cache",
         "Кэш Microsoft Edge": "%homepath%\\AppData\\Local\\Microsoft\\Edge\\User Data\\Default\\Cache",
-        "Кэш Mozilla Firefox": "%homepath%\\AppData\\Local\\Mozilla\\Firefox\\Profiles\\PROF.default\\cache2\\entries",
         "Кэш Opera": "%homepath%\\AppData\\Local\\Opera Software\\Opera Stable\\Cache",
         "Кэш Яндекса": "%homepath%\\AppData\\Local\\Yandex\\YandexBrowser\\User Data\\Default\\Cache",
 		"Временные файлы Windows": "%systeroot%\\Temp"
