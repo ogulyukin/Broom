@@ -52,7 +52,7 @@ void TaskObject::emitResult(QFileInfo &it)
     emit deleted();
 }
 
-void TaskObject::dirInfoCollector(QString path, int &fileC, int &dirC, int &sizeC)
+void TaskObject::dirInfoCollector(QString path, int &fileC, int &dirC, qint64 &sizeC)//let change it to qint64
 {
     QDir *dir = new QDir(path);
     QFileInfoList fileList = dir->entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden);

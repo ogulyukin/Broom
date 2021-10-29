@@ -58,6 +58,7 @@ private:
     int AllElementsSelected;
     int _tic;
     QTimer timer;
+    QTimer repaintTimer;
     int deletedCount;
     void checkAllCb();
     void unCheckAllCb();

@@ -32,7 +32,7 @@ protected:
     int elements;
     QString path;
     void emitResult(QFileInfo &it);
-    void dirInfoCollector(QString path, int &fileC, int &dirC, int &sizeC);
+    void dirInfoCollector(QString path, int &fileC, int &dirC, qint64 &sizeC);
     void clearDirectory(QString path, QString ignore);
     void removeDirectory(QString path);
 };

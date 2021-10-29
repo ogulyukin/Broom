@@ -1,11 +1,12 @@
 #ifndef DIRINFO_H
 #define DIRINFO_H
 
+#include <QObject>
 
 class DirInfo
 {
 public:
-    int size;
+    qint64 size;
     int items;
     int filesC;
     int dirC;

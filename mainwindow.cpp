@@ -14,6 +14,10 @@ MainWindow::MainWindow(QWidget *parent)
     QGridLayout *cbLayout = new QGridLayout(this);
     cbLayout->addWidget(ui->cbAll);
     int count = 1;
+    repaintTimer.setInterval(1000);
+    connect(&repaintTimer, &QTimer::timeout, [=](){
+        ui->progressBar->repaint();
+    });
 
     //Recicle Bin
     QCheckBox *rcb = new QCheckBox("Очистка корзины", ui->groupBox);
@@ -72,6 +76,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
+    repaintTimer.start();
     calculateAllElementsSelected();
     if(AllElementsSelected > 0)
     {
@@ -90,6 +95,7 @@ void MainWindow::on_pushButton_clicked()
     ui->cbAll->setChecked(false);
     timer.setInterval(2000);
     timer.start();
+    repaintTimer.stop();
     //QMessageBox::information(this, "Информация", "Задания по удалению завершены!");
 }
 
