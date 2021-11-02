@@ -10,7 +10,7 @@
 #include <QGridLayout>
 #include <QMessageBox>
 #include <QThreadPool>
-#include <QTimer>
+//#include <QTimer>
 #include "tasktrashbox.h"
 #include "taskuserpath.h"
 #include "taskthread.h"
@@ -47,6 +47,7 @@ private slots:
 public slots:
     void deleteCounter();
     void finishProgressBar();
+    void finishedTask();
 
 private:
     Ui::MainWindow *ui;
@@ -57,12 +58,13 @@ private:
     //QMap<QString, int> foundElements;
     int AllElementsSelected;
     int _tic;
-    QTimer timer;
-    QTimer repaintTimer;
+    //QTimer timer;
+    //QTimer repaintTimer;
     int deletedCount;
     void checkAllCb();
     void unCheckAllCb();
     void calculateAllElementsSelected();
     void connecter(TaskObject* tobj);
+    int taskCount;
 };
 #endif // MAINWINDOW_H

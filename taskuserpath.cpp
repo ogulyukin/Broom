@@ -37,6 +37,7 @@ void TaskUserPAth::run()
     elements = DI->filesC + DI->dirC;
     delete  DI;
     emit sendMsg("ИНФО", "Удаление", QThread::currentThread()->objectName() + " Удаление файлов завершено");
+    emit finished();
 }
 
 bool TaskUserPAth::isExistPath()

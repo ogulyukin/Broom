@@ -2,22 +2,27 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow), taskCount(0)
 {
     configMap = ConfigLoader::readConfig("config.json");
     ui->setupUi(this);
-    QMainWindow::setWindowTitle("Broom. Уборка мусора на вашем компе");
+    QMainWindow::setWindowTitle("Broom. Уборка мусора на вашем компьютере");
     log = new Logger(ui->textBrowser, this);
     connect(this, &MainWindow::sendMsg, log, &Logger::addMessage);
-    connect(&timer, &QTimer::timeout, this, &MainWindow::finishProgressBar);
+    //connect(&timer, &QTimer::timeout, this, &MainWindow::finishProgressBar);
     emit sendMsg("ИНФО", "Запуск программы", "Считано " + QString::number(configMap->size()) + " записей кофигурационного файла");
+//    foreach(auto it, configMap->keys())
+//    {
+//        qDebug() << configMap->value(it);
+//        emit sendMsg("ИНФО", "", configMap->value(it));
+//    }
     QGridLayout *cbLayout = new QGridLayout(this);
     cbLayout->addWidget(ui->cbAll);
     int count = 1;
-    repaintTimer.setInterval(1000);
-    connect(&repaintTimer, &QTimer::timeout, [=](){
-        ui->progressBar->repaint();
-    });
+    //repaintTimer.setInterval(1000);
+    //connect(&repaintTimer, &QTimer::timeout, [=](){
+    //    ui->progressBar->repaint();
+    //});
 
     //Recicle Bin
     QCheckBox *rcb = new QCheckBox("Очистка корзины", ui->groupBox);
@@ -76,7 +81,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    repaintTimer.start();
+    if(taskCount != 0)
+        return;
+    //repaintTimer.start();
     calculateAllElementsSelected();
     if(AllElementsSelected > 0)
     {
@@ -88,14 +95,15 @@ void MainWindow::on_pushButton_clicked()
                 TaskThread *tt = new TaskThread(i);
                 tt->setAutoDelete(true);
                 pool->start(tt);
+                taskCount++;
             }
         }
-        pool->waitForDone();
+        //pool->waitForDone();
     }
-    ui->cbAll->setChecked(false);
-    timer.setInterval(2000);
-    timer.start();
-    repaintTimer.stop();
+   ui->cbAll->setChecked(false);
+//    timer.setInterval(2000);
+//    timer.start();
+//    repaintTimer.stop();
     //QMessageBox::information(this, "Информация", "Задания по удалению завершены!");
 }
 
@@ -135,6 +143,7 @@ void MainWindow::connecter(TaskObject* tobj)
 {
     connect(tobj, &TaskObject::sendMsg, log, &Logger::addMessage, Qt::QueuedConnection);
     connect(tobj, &TaskObject::deleted, this, &MainWindow::deleteCounter, Qt::QueuedConnection);
+    connect(tobj, &TaskObject::finished, this, &MainWindow::finishedTask, Qt::QueuedConnection);
 }
 
 void MainWindow::on_cbAll_stateChanged(int arg1)
@@ -176,5 +185,16 @@ void MainWindow::deleteCounter()
 void MainWindow::finishProgressBar()
 {
     ui->progressBar->setValue(100);
+}
+
+void MainWindow::finishedTask()
+{
+    taskCount--;
+    qDebug() << "taskCount: " << taskCount;
+    if(taskCount == 0)
+    {
+        finishProgressBar();
+        QMessageBox::information(this, "Информация", "Задания по удалению завершены!");
+    }
 }
 
