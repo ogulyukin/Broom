@@ -11,5 +11,6 @@ void TaskTrashBox::run()
     emit sendMsg("УСПЕХ","Удаление", QThread::currentThread()->objectName() + "Очистка Корзины");
     emit deleted();
     cb->setChecked(false);
+    emit finished();
 }
 

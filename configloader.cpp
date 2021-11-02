@@ -30,7 +30,8 @@ QString ConfigLoader::getPath(QString path)
 {
     if(path.startsWith("%homepath%") || path.startsWith("%HOMEPATH%"))
     {
-        path = qEnvironmentVariable("HOMEPATH") + path.remove(0, 10);
+        //path = qEnvironmentVariable("HOMEPATH") + path.remove(0, 10);
+        path = QDir::homePath() + path.remove(0, 10);
     }
     if(path.startsWith("%systeroot%"))
     {

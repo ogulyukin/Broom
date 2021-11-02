@@ -20,6 +20,7 @@ void task1C::run()
     collectExistPath();
     countTargets();
     emit sendMsg("ИНФО", "Удаление кэш 1C", QThread::currentThread()->objectName() + " Удаление файлов завершено");
+    emit finished();
 }
 
 void task1C::collectExistPath()

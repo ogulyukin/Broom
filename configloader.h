@@ -3,6 +3,7 @@
 #include <QMap>
 #include <QString>
 #include <QStringList>
+#include <QDir>
 
 class ConfigLoader
 {

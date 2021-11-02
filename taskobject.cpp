@@ -40,6 +40,16 @@ int TaskObject::getElements()
     return elements;
 }
 
+void TaskObject::setEnable()
+{
+    cb->setEnabled(true);
+}
+
+void TaskObject::setDisable()
+{
+    cb->setDisabled(true);
+}
+
 void TaskObject::emitResult(QFileInfo &it)
 {
     if(!QFile::exists(it.absoluteFilePath()))

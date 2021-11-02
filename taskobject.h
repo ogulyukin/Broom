@@ -21,10 +21,13 @@ public:
     void setCheckBoxUnchecked();
     void seLabelText(QString text);
     int getElements();
+    void setEnable();
+    void setDisable();
 
 signals:
     void sendMsg(QString type, QString actions, QString msg);
     void deleted();
+    void finished();
 
 protected:
     QCheckBox* cb;
